@@ -9,7 +9,6 @@ const jwtSecret = 'your_very_strong_secret_key'; // Update this with a strong se
 // Register a new user
 router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
-    console.log('Register request:', { username, email, password });
 
     try {
         const existingUser = await User.findOne({ email });
@@ -53,7 +52,11 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid password' });
         }
 
-        const token = jwt.sign({ _id: user._id }, jwtSecret);
+        const token = jwt.sign(
+            { _id: user._id, email: user.email }, 
+            'your_very_strong_secret_key'
+          );
+          
         console.log('Login successful, token generated:', token);
         res.header('auth-token', token).json({ token });
     } catch (err) {

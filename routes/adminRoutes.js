@@ -2,20 +2,28 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const Post = require('../models/post');
-
 const jwt = require('jsonwebtoken');
-
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
-  if (!authHeader) return res.status(401).json({ message: 'Unauthorized' });
+  if (!authHeader) {
+    console.log('No authorization header');
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
 
   const token = authHeader.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'Unauthorized' });
+  if (!token) {
+    console.log('No token found');
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
 
   jwt.verify(token, 'your_very_strong_secret_key', (err, user) => {
-    if (err) return res.status(403).json({ message: 'Forbidden' });
+    if (err) {
+      console.log('Token verification failed');
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     req.user = user;
+    console.log('User decoded from token:', user); // Log decoded user
     next();
   });
 }
@@ -30,7 +38,7 @@ const isAdmin = (req, res, next) => {
 };
 
 // Get users
-router.get('/users', isAdmin, async (req, res) => {
+router.get('/users', authenticateToken, isAdmin, async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
@@ -69,6 +77,6 @@ router.delete('/posts/:id', authenticateToken, isAdmin, async (req, res) => {
   }
 });
 
-
 module.exports = router;
+
 

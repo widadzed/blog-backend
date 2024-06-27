@@ -15,6 +15,7 @@ const PostSchema = mongoose.Schema({
         ref: 'User',
         required: true
     },
+   
     categories: [{
         type: String,
       }],
@@ -34,11 +35,17 @@ const PostSchema = mongoose.Schema({
           type: Date,
           default: Date.now,
         },
+      
       }],
+      image: {
+        type: String,
+        required: false
+    },
       createdAt: {
         type: Date,
         default: Date.now,
       },
+
 });
 
 module.exports = mongoose.model('Post', PostSchema);

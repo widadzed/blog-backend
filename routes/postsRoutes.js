@@ -2,11 +2,33 @@ const express = require('express');
 const jwt = require('jsonwebtoken'); // Import jwt for authentication
 const Post = require('../models/post');
 const router = express.Router();
+const multer = require('multer');
+const {GridFsStorage} = require('multer-gridfs-storage');
+const url = 'mongodb://localhost:27017';
+const path = require('path');
+const fs = require('fs');
+const storage = new GridFsStorage({ url });
 
-// Authentication middleware function
+// const uploads = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//      console.log("file", file.buffer.toString('base64'));
+//       cb(null, 'uploads/');
+//     },
+//     filename: (req, file, cb) => {
+//       cb(null, `${Date.now()}-${file.originalname}`);
+//     }
+//   });
+
+const upload = multer({ storage: storage });
+// router.post('/upload', upload.single('file'), (req, res) => {
+//     if (!req.file) {
+//         return res.status(400).send('No files were uploaded.');
+//     }
+//     res.send('File uploaded successfully.');
+// });
 function authenticateToken(req, res, next) {
     const token = req.headers['authorization'];
-    console.log('Token:', token); // Log the token
+    
 
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized' });
@@ -18,15 +40,12 @@ function authenticateToken(req, res, next) {
             console.error('Token decoding error:', err);
             return res.status(403).json({ message: 'Forbidden' });
         }
-        console.log('Decoded token:', decoded); // Log the decoded token
         req.user = decoded; 
         next();
     });
     
 }
 
-
-// Get all posts
 router.get('/', async (req, res) => {
     try {
         const posts = await Post.find().populate('user', 'username');
@@ -36,7 +55,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get a specific post by ID
+// Get a post by ID
 router.get('/:postId', async (req, res) => {
     try {
         const post = await Post.findById(req.params.postId).populate('user', 'username');
@@ -47,16 +66,18 @@ router.get('/:postId', async (req, res) => {
 });
 
 // Create a new post
-router.post('/', authenticateToken, async (req, res) => {
-    const { title, content, categories, tags } = req.body;
-  
+router.post('/', authenticateToken, upload.single('file'), async (req, res) => {
+    const { title, content, categories, tags , file } = req.body;
+   
     const post = new Post({
       title,
       content,
       categories,
       tags,
       user: req.user._id,
+      image: file ||  null
     });
+    
   
     try {
       const savedPost = await post.save();
@@ -104,3 +125,4 @@ router.patch('/:postId', authenticateToken, async (req, res) => {
 });
 
 module.exports = router;
+
