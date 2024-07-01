@@ -1,21 +1,22 @@
 
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const path = require('path');
+
 const app = express();
 const cors = require('cors');
 const adminRoutes = require('./routes/adminRoutes');
 
 
 app.use(cors( '*'));
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public/dist')));
-app.use('/uploads', express.static('uploads'));
+app.use(express.json());
+const port = 8080;
 
-mongoose.connect('mongodb://localhost:27017', { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('Could not connect to MongoDB', err));
+
+mongoose.connect('mongodb://localhost:27017', {
+    useUnifiedTopology: true
+}).then(()=>console.log("connected to MongoDB")).catch((err)=>console.log(err));
+
+  
 
 app.use('/api/posts', require('./routes/postsRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));

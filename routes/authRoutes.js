@@ -1,10 +1,11 @@
+
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const router = express.Router();
 
-const jwtSecret = 'your_very_strong_secret_key'; // Update this with a strong secret key
+const jwtSecret = 'your_very_strong_secret_key'; 
 
 // Register a new user
 router.post('/register', async (req, res) => {
@@ -37,7 +38,7 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    console.log('Login request:', { email, password });
+   
 
     try {
         const user = await User.findOne({ email });
@@ -54,10 +55,10 @@ router.post('/login', async (req, res) => {
 
         const token = jwt.sign(
             { _id: user._id, email: user.email }, 
-            'your_very_strong_secret_key'
-          );
+            jwtSecret
+        );
           
-        console.log('Login successful, token generated:', token);
+        
         res.header('auth-token', token).json({ token });
     } catch (err) {
         console.error('Error logging in user:', err);

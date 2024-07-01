@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
-const Post = require('../models/post');
+const { Post } = require('../models/post');
 const jwt = require('jsonwebtoken');
 
 function authenticateToken(req, res, next) {
@@ -23,7 +23,7 @@ function authenticateToken(req, res, next) {
       return res.status(403).json({ message: 'Forbidden' });
     }
     req.user = user;
-    console.log('User decoded from token:', user); // Log decoded user
+   
     next();
   });
 }
@@ -63,6 +63,7 @@ router.get('/posts', authenticateToken, isAdmin, async (req, res) => {
     const posts = await Post.find().populate('user');
     res.json(posts);
   } catch (err) {
+    console.error('Error:', err);
     res.status(500).json({ message: err.message });
   }
 });
